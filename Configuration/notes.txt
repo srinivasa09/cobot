@@ -1,0 +1,6 @@
+1. Follow the below steps to start the Jenkins server through cmd prompt:
+	a. Open command prompt
+	b. Go to the directory where your war file is placed
+	c. Run the following command
+		java -jar jenkins.war
+		
