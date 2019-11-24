@@ -29,12 +29,12 @@ public class ProcessFailedRecords {
 	
 	@Async
 	@Scheduled(fixedRateString ="${reTryJobInterval}", initialDelay=1000)
-    public void scheduleFixedRateTaskAsync() throws InterruptedException, IOException {
+    public void scheduleFixedRateTaskAsync() throws Exception {
 		
-		Job job = jobRepository.findFirst1ByStatus(STATUS.EXECUTION_TIMEOUT.toString());
+		Job job = jobRepository.findFirst1ByStatus(STATUS.ExecutionTimedout.toString());
 		if(job!=null)
 		{
-			jobRepository.updateStatus(STATUS.BOT_INVOKED.toString(),job.getId());
+			jobRepository.updateStatus(STATUS.Inprocess.toString(),job.getId());
 			String appJobID = JobUtil.getAppJobIDFromDBJobID(job.getId());
 			dispatcherService.processJob(job.getContent(), appJobID,job);
 		}

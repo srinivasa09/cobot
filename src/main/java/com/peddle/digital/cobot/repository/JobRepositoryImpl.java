@@ -24,7 +24,17 @@ public class JobRepositoryImpl implements JobRepositoryCustom {
 		
 		return 0;
 	}
-
 	
-
+	@Override
+	@Transactional
+	public int updateStatusAndReason(String status, String reason, Long id) {
+		
+		  Job job = entityManager.find(Job.class, id);
+		  job.setStatus(status);
+		  if(reason!=null)
+		  {
+			  job.setStatusReason(reason); 
+		  }
+		return 0;
+	}
 }

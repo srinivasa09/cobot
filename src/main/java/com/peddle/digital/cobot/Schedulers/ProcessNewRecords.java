@@ -1,10 +1,5 @@
 package com.peddle.digital.cobot.Schedulers;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -29,12 +24,12 @@ public class ProcessNewRecords {
 	
 	@Async
 	@Scheduled(fixedRateString ="${newJobInterval}", initialDelay=1000)
-    public void scheduleFixedRateTaskAsync() throws InterruptedException, IOException {
+    public void scheduleFixedRateTaskAsync() throws Exception {
 		
-		Job job = jobRepository.findFirst1ByStatus(STATUS.IN_PROCESS.toString());
+		Job job = jobRepository.findFirst1ByStatus(STATUS.Submitted.toString());
 		if(job!=null)
 		{
-			jobRepository.updateStatus(STATUS.BOT_INVOKED.toString(),job.getId());
+			jobRepository.updateStatus(STATUS.Inprocess.toString(),job.getId());
 			String appJobID = JobUtil.getAppJobIDFromDBJobID(job.getId());
 			dispatcherService.processJob(job.getContent(), appJobID,job);
 		}

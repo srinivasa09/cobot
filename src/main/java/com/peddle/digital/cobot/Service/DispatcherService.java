@@ -1,14 +1,17 @@
 package com.peddle.digital.cobot.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cobot.utils.JiraAddUserTest;
+
 import com.peddle.digital.cobot.Util.Base64Utils;
 import com.peddle.digital.cobot.constants.STATUS;
+import com.peddle.digital.cobot.constants.TargetSystems;
 import com.peddle.digital.cobot.model.Job;
 import com.peddle.digital.cobot.repository.JobRepository;
 
@@ -18,11 +21,11 @@ public class DispatcherService {
     @Autowired
     JobRepository jobRepository;
 
-	public void processJob(String content, String appJobID, Job job) throws IOException {
+	public void processJob(String content, String appJobID, Job job) throws Exception {
 
 		JSONObject obj = new JSONObject(content);
 		String targetSystem = obj.getString("TargetSystemURL");
-		if(targetSystem.contains("jira"))
+		if(targetSystem.contains(TargetSystems.JIRA))
 		{
 			String adminCred = obj.getString("AdminCredentails");
 			String newUser = obj.getString("NewUser");
@@ -36,12 +39,18 @@ public class DispatcherService {
 				String adminPass =  split[1];
 				if(adminUser== null ||  adminPass == null)
 				{
-					jobRepository.updateStatus(STATUS.EXECUTION_FAILED.toString(),job.getId());
+					jobRepository.updateStatus(STATUS.Failed.toString(),job.getId());
 				}
 				else
 				{
-					JiraAddUserTest jira = new JiraAddUserTest();
-					jira.test(split[0], split[1], newUser,targetSystem);
+					 Map<String, Object> inputData = new HashMap<String, Object>();
+					 inputData.put("url", targetSystem);
+				     inputData.put("adminUserName", adminUser);
+				     inputData.put("adminPassword", adminPass);
+				        inputData.put("newUser", newUser);
+				        inputData.put("jobId", appJobID);
+					com.cobot.testcases.JiraAddUserTest jira = new com.cobot.testcases.JiraAddUserTest();
+					jira.test(inputData);
 				}
 			}
 		}
