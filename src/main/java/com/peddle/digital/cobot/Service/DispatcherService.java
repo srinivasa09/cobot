@@ -1,13 +1,11 @@
 package com.peddle.digital.cobot.Service;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 
 import com.peddle.digital.cobot.Util.Base64Utils;
 import com.peddle.digital.cobot.constants.STATUS;
@@ -25,6 +23,7 @@ public class DispatcherService {
 
 		JSONObject obj = new JSONObject(content);
 		String targetSystem = obj.getString("TargetSystemURL");
+		
 		if(targetSystem.contains(TargetSystems.JIRA))
 		{
 			String adminCred = obj.getString("AdminCredentails");
@@ -47,12 +46,13 @@ public class DispatcherService {
 					 inputData.put("url", targetSystem);
 				     inputData.put("adminUserName", adminUser);
 				     inputData.put("adminPassword", adminPass);
-				        inputData.put("newUser", newUser);
-				        inputData.put("jobId", appJobID);
-					com.cobot.testcases.JiraAddUserTest jira = new com.cobot.testcases.JiraAddUserTest();
-					jira.test(inputData);
+				     inputData.put("newUser", newUser);
+				     inputData.put("jobId", appJobID);
+					 com.cobot.testcases.JiraAddUserTest jira = new com.cobot.testcases.JiraAddUserTest();
+					 jira.test(content,appJobID);
 				}
 			}
 		}
+		
 	}
 }
