@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.peddle.digital.cobot.Util.Base64Utils;
 import com.peddle.digital.cobot.Util.JobUtil;
@@ -56,6 +60,24 @@ public class JobController {
     	JobResponse updateResponse = JobUtil.updateResponse(saveJob, null);
     	return updateResponse;
     }
+    
+    
+    @RequestMapping(value = "/job/agent", method = RequestMethod.POST)
+	public @ResponseBody
+	JobResponse uploadFileHandler(@RequestParam("AgentIP") String agentIP,
+			@RequestParam("File") String fileName,
+			@RequestParam("Body") String content)
+	{
+    	Job job = new Job();
+    	job.setStatus(STATUS.Submitted.toString());
+    	job.setJobStatusCode(STATUS.Submitted.getID());
+    	job.setContent(content);
+    	job.setRemoteAgentIP(agentIP);
+    	job.setScriptFileName(fileName);
+    	Job saveJob = jobRepository.save(job);
+    	JobResponse updateResponse = JobUtil.updateResponse(saveJob, null);
+    	return updateResponse;
+	}
     
     @PostMapping("/job/status/{id}")
     public JobResponse getJobStatus(@PathVariable(value = "id") String appJobId) {

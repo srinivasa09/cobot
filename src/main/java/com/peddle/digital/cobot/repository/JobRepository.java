@@ -13,7 +13,9 @@ import com.peddle.digital.cobot.model.Job;
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long>,JobRepositoryCustom {
 	
-	Job findFirst1ByStatus(String status);
+	Job findFirst1ByStatusAndRemoteAgentIPIsNotNull(String status);
+	Job findFirst1ByStatusAndRemoteAgentIPIsNull(String status);
+	//Job findByCustomerAndUsedOnIsNull(Customer);
 	
 }
 

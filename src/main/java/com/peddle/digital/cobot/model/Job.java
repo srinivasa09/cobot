@@ -31,6 +31,10 @@ public class Job {
     private String statusReason;
     
     private int jobStatusCode;
+    
+	private String remoteAgentIP;
+    
+    private String scriptFileName;
 
     @NotBlank
     @Column(columnDefinition="VARCHAR(500)")
@@ -100,5 +104,21 @@ public class Job {
 
 	public void setJobStatusCode(int jobStatusCode) {
 		this.jobStatusCode = jobStatusCode;
+	}
+	
+	public String getRemoteAgentIP() {
+		return remoteAgentIP;
+	}
+
+	public void setRemoteAgentIP(String remoteAgentIP) {
+		this.remoteAgentIP = remoteAgentIP;
+	}
+
+	public String getScriptFileName() {
+		return scriptFileName;
+	}
+
+	public void setScriptFileName(String scriptFileName) {
+		this.scriptFileName = scriptFileName;
 	}
 }

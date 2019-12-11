@@ -26,7 +26,7 @@ public class ProcessNewRecords {
 	@Scheduled(fixedRateString ="${newJobInterval}", initialDelay=1000)
     public void scheduleFixedRateTaskAsync() throws Exception {
 		
-		Job job = jobRepository.findFirst1ByStatus(STATUS.Submitted.toString());
+		Job job = jobRepository.findFirst1ByStatusAndRemoteAgentIPIsNull(STATUS.Submitted.toString());
 		if(job!=null)
 		{
 			jobRepository.updateStatus(STATUS.Inprocess.toString(),job.getId());

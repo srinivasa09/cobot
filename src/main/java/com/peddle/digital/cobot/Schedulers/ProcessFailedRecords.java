@@ -31,7 +31,7 @@ public class ProcessFailedRecords {
 	@Scheduled(fixedRateString ="${reTryJobInterval}", initialDelay=1000)
     public void scheduleFixedRateTaskAsync() throws Exception {
 		
-		Job job = jobRepository.findFirst1ByStatus(STATUS.ExecutionTimedout.toString());
+		Job job = jobRepository.findFirst1ByStatusAndRemoteAgentIPIsNull(STATUS.ExecutionTimedout.toString());
 		if(job!=null)
 		{
 			jobRepository.updateStatus(STATUS.Inprocess.toString(),job.getId());
