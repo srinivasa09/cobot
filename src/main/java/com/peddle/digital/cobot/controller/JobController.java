@@ -61,7 +61,6 @@ public class JobController {
     	return updateResponse;
     }
     
-    
     @RequestMapping(value = "/job/agent", method = RequestMethod.POST)
 	public @ResponseBody
 	JobResponse uploadFileHandler(@RequestParam("AgentIP") String agentIP,
@@ -73,6 +72,22 @@ public class JobController {
     	job.setJobStatusCode(STATUS.Submitted.getID());
     	job.setContent(content);
     	job.setRemoteAgentIP(agentIP);
+    	job.setScriptFileName(fileName);
+    	Job saveJob = jobRepository.save(job);
+    	JobResponse updateResponse = JobUtil.updateResponse(saveJob, null);
+    	return updateResponse;
+	}
+    
+    @RequestMapping(value = "/job/script", method = RequestMethod.POST)
+	public @ResponseBody
+	JobResponse executeScript(
+			@RequestParam("File") String fileName,
+			@RequestParam("Body") String content)
+	{
+    	Job job = new Job();
+    	job.setStatus(STATUS.Submitted.toString());
+    	job.setJobStatusCode(STATUS.Submitted.getID());
+    	job.setContent(content);
     	job.setScriptFileName(fileName);
     	Job saveJob = jobRepository.save(job);
     	JobResponse updateResponse = JobUtil.updateResponse(saveJob, null);
