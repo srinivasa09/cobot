@@ -113,13 +113,24 @@ public class DispatcherService {
 		
 		String from = scriptsDir+scriptFile;
 		String to = scriptRootDir+"/"+scriptpackagedDir+scriptFile;
-
+		
+		File file = new File(to);
+		
+		if(!file.getParentFile().exists())
+		{
+		    file.getParentFile().mkdirs();
+		}
+		   
+	
 		//copyFile(from,to);
 		convertJavaCode(new File(from),new File(to));
 
 		String seleniumDependencies = env.getProperty("testcases.selenium.dependencies");
+		
+		String classpath = System.getProperty("java.class.path");
+		System.out.println(classpath);
 
-		Process p = Runtime.getRuntime().exec("javac -cp " + seleniumDependencies +" " + to);
+		Process p = Runtime.getRuntime().exec("javac -cp " + classpath +" " + to);
 		p.waitFor();
 		System.out.println("compilation Finished");
 		
