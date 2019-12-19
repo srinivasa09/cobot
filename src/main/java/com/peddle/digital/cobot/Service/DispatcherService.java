@@ -4,8 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -13,21 +14,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.peddle.digital.cobot.Util.Base64Utils;
-import com.peddle.digital.cobot.constants.STATUS;
-import com.peddle.digital.cobot.constants.TargetSystems;
 import com.peddle.digital.cobot.model.Job;
 import com.peddle.digital.cobot.repository.JobRepository;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 
 
@@ -81,7 +80,8 @@ public class DispatcherService {
 
 		if(job.getScriptFileName() != null)
 		{
-			System.setProperty("webdriver.gecko.driver","C:/dump/git/CoBotAutomation/Drivers/geckodriver.exe");
+		        WebDriverManager.firefoxdriver().setup();
+			//System.setProperty("webdriver.gecko.driver","C:/dump/git/CoBotAutomation/Drivers/geckodriver.exe");
 			compileScriptFile(job.getScriptFileName(), content);
 		}
 	}
@@ -102,7 +102,6 @@ public class DispatcherService {
 
 		 for(Object a: list){
 			 data.add(String.valueOf(a));
-		    
 		 }
 		 System.out.println(data);
 		
@@ -129,9 +128,26 @@ public class DispatcherService {
 		
 		String classpath = System.getProperty("java.class.path");
 		System.out.println(classpath);
-
-		Process p = Runtime.getRuntime().exec("javac -cp " + classpath +" " + to);
+		
+		
+		Process p = Runtime.getRuntime().exec("javac -cp \"" + classpath +" \" " + to);
 		p.waitFor();
+		
+		InputStream inputStream = p.getInputStream();
+		
+		StringWriter writer = new StringWriter();
+		IOUtils.copy(inputStream, writer, "UTF-8");
+		String theString = writer.toString();
+		
+		
+		 InputStream errorStream = p.getErrorStream();
+		
+		StringWriter writer1 = new StringWriter();
+		IOUtils.copy(errorStream, writer1, "UTF-8");
+		String theString1 = writer1.toString();
+                System.out.println(theString1);
+                
+		
 		System.out.println("compilation Finished");
 		
 	 	File root = new File(scriptRootDir); 
@@ -227,10 +243,9 @@ public class DispatcherService {
 
 				if(line.contains("public class"))
 				{
-
+				        
 					line =  "public class "+className +"{";
 				}
-
 
 				System.out.println(line);
 				writer.println(line);
