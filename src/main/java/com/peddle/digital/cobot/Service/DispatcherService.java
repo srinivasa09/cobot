@@ -17,12 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.peddle.digital.cobot.Util.Base64Utils;
 import com.peddle.digital.cobot.model.Job;
 import com.peddle.digital.cobot.repository.JobRepository;
 
@@ -30,8 +32,11 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 
 
+
 @Component
 public class DispatcherService {
+	
+	final static Logger logger = Logger.getLogger(DispatcherService.class);
 
 	@Autowired
 	JobRepository jobRepository;
@@ -133,11 +138,7 @@ public class DispatcherService {
 		Process p = Runtime.getRuntime().exec("javac -cp \"" + classpath +" \" " + to);
 		p.waitFor();
 		
-		InputStream inputStream = p.getInputStream();
-		
-		StringWriter writer = new StringWriter();
-		IOUtils.copy(inputStream, writer, "UTF-8");
-		String theString = writer.toString();
+
 		
 		
 		 InputStream errorStream = p.getErrorStream();
@@ -145,10 +146,10 @@ public class DispatcherService {
 		StringWriter writer1 = new StringWriter();
 		IOUtils.copy(errorStream, writer1, "UTF-8");
 		String theString1 = writer1.toString();
-                System.out.println(theString1);
-                
+        System.out.println(theString1);
+       
+		logger.info("compilation Finished");
 		
-		System.out.println("compilation Finished");
 		
 	 	File root = new File(scriptRootDir); 
 	 	
@@ -189,6 +190,7 @@ public class DispatcherService {
 			String line = reader.readLine();
 			boolean initconvert = false;
 			int countvariables=0;
+			String createdClassName="";
 
 			while (line != null) {
 
@@ -235,7 +237,7 @@ public class DispatcherService {
 				}
 
 				//rename test method
-				if(line.contains("public void testUntitledTestCase()"))
+				if(line.contains("public void test"+createdClassName))
 				{
 					initconvert=true;
 					line =  "public void test(java.util.List<String> data) {";
@@ -243,7 +245,7 @@ public class DispatcherService {
 
 				if(line.contains("public class"))
 				{
-				        
+					createdClassName  =  line.replace("public class ", "").replace("{", "").trim();   
 					line =  "public class "+className +"{";
 				}
 
