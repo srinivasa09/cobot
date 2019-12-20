@@ -24,243 +24,202 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.peddle.digital.cobot.Util.Base64Utils;
+import com.peddle.digital.cobot.constants.TargetSystems;
 import com.peddle.digital.cobot.model.Job;
 import com.peddle.digital.cobot.repository.JobRepository;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 
-
-
 @Component
 public class DispatcherService {
-	
-	final static Logger logger = Logger.getLogger(DispatcherService.class);
 
-	@Autowired
-	JobRepository jobRepository;
+    final static Logger logger = Logger.getLogger(DispatcherService.class);
 
-	@Autowired
-	private Environment env;
+    @Autowired
+    JobRepository jobRepository;
 
-	public void processJob(String content, String appJobID, Job job) throws Exception {
+    @Autowired
+    private Environment env;
 
-		JSONObject obj = new JSONObject(content);
-		//String targetSystem = obj.getString("TargetSystemURL");
+    public void processJob(String content, String appJobID, Job job) throws Exception {
 
-//		if(targetSystem != null && targetSystem.contains(TargetSystems.JIRA))
-//		{
-//			String statusCallBackUrl = env.getProperty("cobot.status.callback.url");
-//			com.cobot.testcases.JiraAddUserTest jira = new com.cobot.testcases.JiraAddUserTest();
-//			jira.test(content, appJobID, statusCallBackUrl);
-//
-//			//			String adminCred = obj.getString("AdminCredentails");
-//			//			String newUser = obj.getString("NewUser");
-//			//
-//			//			String decode = Base64Utils.decode(adminCred);
-//			//			String[] split = decode.split(":");
-//			//
-//			//			if(split.length ==2)
-//			//			{
-//			//				String adminUser =  split[0];
-//			//				String adminPass =  split[1];
-//			//				if(adminUser== null ||  adminPass == null)
-//			//				{
-//			//					jobRepository.updateStatus(STATUS.Failed.toString(),job.getId());
-//			//				}
-//			//				else
-//			//				{
-//			//					 Map<String, Object> inputData = new HashMap<String, Object>();
-//			//					 inputData.put("url", targetSystem);
-//			//				     inputData.put("adminUserName", adminUser);
-//			//				     inputData.put("adminPassword", adminPass);
-//			//				     inputData.put("newUser", newUser);
-//			//				     inputData.put("jobId", appJobID);
-//			//					 com.cobot.testcases.JiraAddUserTest jira = new com.cobot.testcases.JiraAddUserTest();
-//			//					
-//			//				}
-//			//			}
-//		}
+	JSONObject obj = new JSONObject(content);
+	String targetSystem =null;
 
-		if(job.getScriptFileName() != null)
-		{
-		        WebDriverManager.firefoxdriver().setup();
-			//System.setProperty("webdriver.gecko.driver","C:/dump/git/CoBotAutomation/Drivers/geckodriver.exe");
-			compileScriptFile(job.getScriptFileName(), content);
-		}
+	if (obj.has("TargetSystemURL")) {
+	    targetSystem = obj.getString("TargetSystemURL");
 	}
 
-	public  String compileScriptFile(String scriptFile, String Content) throws Exception
+
+	if(targetSystem != null && targetSystem.contains(TargetSystems.JIRA))
 	{
+	    String statusCallBackUrl = env.getProperty("cobot.status.callback.url");
+	    com.cobot.testcases.JiraAddUserTest jira = new com.cobot.testcases.JiraAddUserTest();
+	    jira.test(content, appJobID, statusCallBackUrl);
+	}
 
-		//		testcases.root=C:/dump/code/test1/src/test/java
-		//				testcases.packagedir=com/example/tests/
-		//				testcases.package=com.example.tests
-		//
-		//				testcases.repo=C:/dump/code/repo/
-		
-		JSONObject obj = new JSONObject(Content);
-		JSONArray jsonArray = obj.getJSONArray("data");
-		List<Object> list = jsonArray.toList();
-		List<String> data= new ArrayList<String> ();
+	if(job.getScriptFileName() != null)
+	{
+	    WebDriverManager.firefoxdriver().setup();
 
-		 for(Object a: list){
-			 data.add(String.valueOf(a));
-		 }
-		 System.out.println(data);
-		
-		String scriptsDir = env.getProperty("scripts.dir");
-		String scriptRootDir = env.getProperty("testcases.root");
-		String scriptpackagedDir = env.getProperty("testcases.packagedir");
-		String scriptpackage = env.getProperty("testcases.package");
-		
-		String from = scriptsDir+scriptFile;
-		String to = scriptRootDir+"/"+scriptpackagedDir+scriptFile;
-		
-		File file = new File(to);
-		
-		if(!file.getParentFile().exists())
-		{
-		    file.getParentFile().mkdirs();
-		}
-		   
+	    compileScriptFile(job.getScriptFileName(), content);
+	}
+    }
+
+    public  String compileScriptFile(String scriptFile, String Content) throws Exception
+    {
+	JSONObject obj = new JSONObject(Content);
+	JSONArray jsonArray = obj.getJSONArray("data");
+	List<Object> list = jsonArray.toList();
+	List<String> data= new ArrayList<String> ();
+
+	for(Object a: list){
+	    data.add(String.valueOf(a));
+	}
+	System.out.println(data);
+
+	String scriptsDir = env.getProperty("scripts.dir");
+	String scriptRootDir = env.getProperty("testcases.root");
+	String scriptpackagedDir = env.getProperty("testcases.packagedir");
+	String scriptpackage = env.getProperty("testcases.package");
+
+	String from = scriptsDir+scriptFile;
+	String to = scriptRootDir+"/"+scriptpackagedDir+scriptFile;
+
+	File file = new File(to);
+
+	if(!file.getParentFile().exists())
+	{
+	    file.getParentFile().mkdirs();
+	}
+
+	convertJavaCode(new File(from),new File(to));
+
+	String classpath = System.getProperty("java.class.path");
 	
-		//copyFile(from,to);
-		convertJavaCode(new File(from),new File(to));
+	Process p = Runtime.getRuntime().exec("javac -cp \"" + classpath +" \" " + to);
+	p.waitFor();
 
-		String seleniumDependencies = env.getProperty("testcases.selenium.dependencies");
-		
-		String classpath = System.getProperty("java.class.path");
-		System.out.println(classpath);
-		
-		
-		Process p = Runtime.getRuntime().exec("javac -cp \"" + classpath +" \" " + to);
-		p.waitFor();
-		
+	InputStream errorStream = p.getErrorStream();
 
-		
-		
-		 InputStream errorStream = p.getErrorStream();
-		
-		StringWriter writer1 = new StringWriter();
-		IOUtils.copy(errorStream, writer1, "UTF-8");
-		String theString1 = writer1.toString();
-        System.out.println(theString1);
-       
-		logger.info("compilation Finished");
-		
-		
-	 	File root = new File(scriptRootDir); 
-	 	
-		URLClassLoader child = new URLClassLoader(
-		        new URL[] { root.toURI().toURL() },
-		        this.getClass().getClassLoader()
+	StringWriter writer1 = new StringWriter();
+	IOUtils.copy(errorStream, writer1, "UTF-8");
+	String theString1 = writer1.toString();
+	System.out.println(theString1);
+
+	logger.info("compilation Finished");
+
+
+	File root = new File(scriptRootDir); 
+
+	URLClassLoader child = new URLClassLoader(
+		new URL[] { root.toURI().toURL() },
+		this.getClass().getClassLoader()
 		);
-		
-		String javaClass  = scriptFile.replace(".java", "") ;
-		
-		Class classToLoad = Class.forName(scriptpackage + "."+javaClass, true, child);
-		Method method =  classToLoad.getMethod("test", java.util.List.class);
-		Method methodSetup =  classToLoad.getMethod("setUp");
-		Object instance = classToLoad.newInstance();
-		methodSetup.invoke(instance);
-		Object result = method.invoke(instance,data);
 
-		return "success";
-	}
+	String javaClass  = scriptFile.replace(".java", "") ;
 
+	Class classToLoad = Class.forName(scriptpackage + "."+javaClass, true, child);
+	Method method =  classToLoad.getMethod("test", java.util.List.class);
+	Method methodSetup =  classToLoad.getMethod("setUp");
+	Object instance = classToLoad.newInstance();
+	methodSetup.invoke(instance);
+	Object result = method.invoke(instance,data);
 
-	public static void copyFile(String from, String to) throws IOException{
-		Path src = Paths.get(from);
-		Path dest = Paths.get(to);
-		Files.copy(src, dest);
-	}
+	return "success";
+    }
 
-	public static void convertJavaCode(File src, File dest) {
-		BufferedReader reader;
-		try {
+    public static void copyFile(String from, String to) throws IOException{
+	Path src = Paths.get(from);
+	Path dest = Paths.get(to);
+	Files.copy(src, dest);
+    }
 
-			String fileName = src.getAbsolutePath();
-			reader = new BufferedReader(new FileReader(src.getAbsolutePath()));
-			PrintWriter writer = new PrintWriter(dest);
+    public static void convertJavaCode(File src, File dest) {
+	BufferedReader reader;
+	try {
 
-			String className = fileName.substring(fileName.lastIndexOf("\\")+1).replace(".java","");
+	    String fileName = src.getAbsolutePath();
+	    reader = new BufferedReader(new FileReader(src.getAbsolutePath()));
+	    PrintWriter writer = new PrintWriter(dest);
 
-			String line = reader.readLine();
-			boolean initconvert = false;
-			int countvariables=0;
-			String createdClassName="";
+	    String className = fileName.substring(fileName.lastIndexOf("\\")+1).replace(".java","");
 
-			while (line != null) {
+	    String line = reader.readLine();
+	    boolean initconvert = false;
+	    int countvariables=0;
+	    String createdClassName="";
 
-				if(initconvert)
-				{		   
+	    while (line != null) {
 
-					if(line.contains("driver.get(")) 
-					{
-						line= line.replace("driver.get(", "driver.navigate().to(");
-					}
+		if(initconvert)
+		{		   
 
-					if(line.contains(".sendKeys("))
-					{
-						String  prefix = line.substring(0, line.lastIndexOf(".sendKeys(")+1);
-						String  suffix = line.substring(line.lastIndexOf(".sendKeys(")+1);
-						int quoteIndex = suffix.indexOf("\"");
-						if(quoteIndex!=-1)
-						{
-							String ops = suffix.substring(0,suffix.indexOf("\""));
-							ops=ops+"data.get("+countvariables+"));";
-							//System.out.println(ops);
+		    if(line.contains("driver.get(")) 
+		    {
+			line= line.replace("driver.get(", "driver.navigate().to(");
+		    }
 
-							line = prefix+ops;
+		    if(line.contains(".sendKeys("))
+		    {
+			String  prefix = line.substring(0, line.lastIndexOf(".sendKeys(")+1);
+			String  suffix = line.substring(line.lastIndexOf(".sendKeys(")+1);
+			int quoteIndex = suffix.indexOf("\"");
+			if(quoteIndex!=-1)
+			{
+			    String ops = suffix.substring(0,suffix.indexOf("\""));
+			    ops=ops+"data.get("+countvariables+"));";
+			    //System.out.println(ops);
 
-						}
-						countvariables++;
-					}
+			    line = prefix+ops;
 
-					if(line.contains("selectByVisibleText("))
-					{
-						String  prefix = line.substring(0, line.lastIndexOf(".selectByVisibleText(")+1);
-						String  suffix = line.substring(line.lastIndexOf(".selectByVisibleText(")+1);
-						int quoteIndex = suffix.indexOf("\"");
-						if(quoteIndex!=-1)
-						{
-							String ops = suffix.substring(0,suffix.indexOf("\""));
-							ops=ops+"data.get("+countvariables+"));";
-							//System.out.println(ops);
-							line = prefix+ops;
-						}
-						countvariables++;
-					}
-
-				}
-
-				//rename test method
-				if(line.contains("public void test"+createdClassName))
-				{
-					initconvert=true;
-					line =  "public void test(java.util.List<String> data) {";
-				}
-
-				if(line.contains("public class"))
-				{
-					createdClassName  =  line.replace("public class ", "").replace("{", "").trim();   
-					line =  "public class "+className +"{";
-				}
-
-				System.out.println(line);
-				writer.println(line);
-				// read next line
-				line = reader.readLine();
 			}
-			reader.close();
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+			countvariables++;
+		    }
+
+		    if(line.contains("selectByVisibleText("))
+		    {
+			String  prefix = line.substring(0, line.lastIndexOf(".selectByVisibleText(")+1);
+			String  suffix = line.substring(line.lastIndexOf(".selectByVisibleText(")+1);
+			int quoteIndex = suffix.indexOf("\"");
+			if(quoteIndex!=-1)
+			{
+			    String ops = suffix.substring(0,suffix.indexOf("\""));
+			    ops=ops+"data.get("+countvariables+"));";
+			    //System.out.println(ops);
+			    line = prefix+ops;
+			}
+			countvariables++;
+		    }
+
 		}
+
+		//rename test method
+		if(line.contains("public void test"+createdClassName))
+		{
+		    initconvert=true;
+		    line =  "public void test(java.util.List<String> data) {";
+		}
+
+		if(line.contains("public class"))
+		{
+		    createdClassName  =  line.replace("public class ", "").replace("{", "").trim();   
+		    line =  "public class "+className +"{";
+		}
+
+		System.out.println(line);
+		writer.println(line);
+		// read next line
+		line = reader.readLine();
+	    }
+	    reader.close();
+	    writer.flush();
+	    writer.close();
+	} catch (IOException e) {
+	    e.printStackTrace();
 	}
+    }
 }
 
 
