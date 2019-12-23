@@ -2,6 +2,7 @@ package com.peddle.digital.cobot.Util;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -59,24 +60,29 @@ public class ComplieScriptUtil {
 	errorStream.close();
 	logger.info("compilation Finished");
 
-	
-	
 	String scriptclassFile = scriptpackage+"."+scriptFile.replace(".java","");
 	
-        Process runscript = Runtime.getRuntime().exec("java -cp \"" + classpath +";"+scriptRootDir+" \" " +scriptclassFile + " "+content);
+	String minnifiedJsonContent =  new JSONObject(content).toString();
+	
+	String firfoxDriverPath = System.getProperty("webdriver.gecko.driver");
+	firfoxDriverPath=firfoxDriverPath.replace("\\", "/");
+	
+    Process runscript = Runtime.getRuntime().exec("java  -Dwebdriver.gecko.driver="+firfoxDriverPath+"  -cp \"" + classpath +";"+scriptRootDir+" \" " +scriptclassFile + " "+minnifiedJsonContent);
 	runscript.waitFor();
+	
+//	InputStream outStream = runscript.getInputStream();
+//	StringWriter scriptoutput = new StringWriter();
+//	IOUtils.copy(outStream, scriptoutput, "UTF-8");
+//	String scriptOutput = scriptoutput.toString();
+//	errorStream.close();
+//	System.out.println(scriptOutput);
+	
 	errorStream = runscript.getErrorStream();
 	StringWriter scriptRunWriter = new StringWriter();
 	IOUtils.copy(errorStream, scriptRunWriter, "UTF-8");
 	String runErrorStr = scriptRunWriter.toString();
 	errorStream.close();
 	System.out.println(runErrorStr);
-	
-	
-//	StringWriter compileStringWriter = new StringWriter();
-//	IOUtils.copy(errorStream, compileStringWriter, "UTF-8");
-//	String compileString = compileStringWriter.toString();
-//	System.out.println(compileString);
 	
 //	URLClassLoader child = new URLClassLoader(
 //		new URL[] { root.toURI().toURL() },
