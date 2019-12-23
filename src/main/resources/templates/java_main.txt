@@ -1,0 +1,20 @@
+        public static void main(String[] args)
+        {
+            JSONObject obj = new JSONObject(args[0]);
+    	    JSONArray jsonArray = obj.getJSONArray("data");
+    	    List<Object> list = jsonArray.toList();
+    	    List<String> data= new ArrayList<String> ();
+
+    	    for(Object a: list){
+    	       data.add(String.valueOf(a));
+    	    } 
+    	    
+    	    <CLASS_NAME> testObject= new <CLASS_NAME>();
+    	    try {  
+    	    	testObject.setUp();
+    	        testObject.test(data);
+    	        testObject.tearDown();
+    	    } catch(Exception e) {
+	            e.printStackTrace();
+	        }
+        }
