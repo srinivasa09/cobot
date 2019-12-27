@@ -17,7 +17,6 @@ public class JavaCodeUtil {
 
     public static void convertJavaCode(File src, File dest) {
 	BufferedReader reader=null;
-	BufferedReader javaMainReader=null;
 	PrintWriter writer = null;
 
 	try {
@@ -31,8 +30,7 @@ public class JavaCodeUtil {
 	    String line = reader.readLine();
 	    boolean initconvert = false;
 	    boolean addedImports=false;
-	    int countvariables=0;
-	    String createdClassName="";
+	    CountHolder count=new CountHolder(0);
 
 	    ArrayList<String> javaCodeList = new ArrayList<String>();
 
@@ -40,88 +38,40 @@ public class JavaCodeUtil {
 
 		if(initconvert)
 		{		   
-		    if(line.contains("driver.get(")) 
-		    {
-			line= line.replace("driver.get(", "driver.navigate().to(");
-		    }
-
-		    if(line.contains(".sendKeys("))
-		    {
-			String  prefix = line.substring(0, line.lastIndexOf(".sendKeys(")+1);
-			String  suffix = line.substring(line.lastIndexOf(".sendKeys(")+1);
-			int quoteIndex = suffix.indexOf("\"");
-			if(quoteIndex!=-1)
-			{
-			    String ops = suffix.substring(0,suffix.indexOf("\""));
-			    ops=ops+"data.get("+countvariables+"));";
-			    //System.out.println(ops);
-
-			    line = prefix+ops;
-
-			}
-			countvariables++;
-		    }
-
-		    if(line.contains("selectByVisibleText("))
-		    {
-			String  prefix = line.substring(0, line.lastIndexOf(".selectByVisibleText(")+1);
-			String  suffix = line.substring(line.lastIndexOf(".selectByVisibleText(")+1);
-			int quoteIndex = suffix.indexOf("\"");
-			if(quoteIndex!=-1)
-			{
-			    String ops = suffix.substring(0,suffix.indexOf("\""));
-			    ops=ops+"data.get("+countvariables+"));";
-			    //System.out.println(ops);
-			    line = prefix+ops;
-			}
-			countvariables++;
-		    }
-
-
+		    line = updateTestMethodContents(line,count);
 		}
-		
+
 		if( !addedImports && line.startsWith("import ")) {
 		    addImports(javaCodeList);
 		    addedImports=true;
 		}
 
 		//rename test method
-		if(line.contains("public void test"))
+		else if(line.contains("public void test"))
 		{
 		    initconvert=true;
 		    line =  "public void test(java.util.List<String> data) {";
 		}
 
-		if(line.contains("public class"))
-		{
-		    createdClassName  =  line.replace("public class ", "").replace("{", "").trim();   
+		else if(line.contains("public class"))
+		{   
 		    line =  "public class "+className +"{";
+		}
+
+		else if(line.startsWith("package com.example.tests"))
+		{   
+		    line =  "";
 		}
 
 		javaCodeList.add(line);
 		line = reader.readLine();
 	    }
+	    
 	    reader.close();
 	    javaCodeList.remove(javaCodeList.size() - 1);
-	    //writer.flush();
-	    //writer.close();
 
-	    InputStream javaMainstream = JavaCodeUtil.class.getResourceAsStream("/templates/java_main.txt");
+	    addMainMethod(javaCodeList,className);
 
-	    javaMainReader = new BufferedReader(new InputStreamReader(javaMainstream));
-
-	    line = javaMainReader.readLine();
-
-	    while (line != null) {
-
-		if(line.contains("<CLASS_NAME>"))
-		{
-		    line = line.replaceAll("<CLASS_NAME>", className) ;
-		}
-
-		javaCodeList.add(line);
-		line = javaMainReader.readLine();
-	    }
 	    javaCodeList.add("}");
 
 	    for(String entry: javaCodeList)
@@ -137,7 +87,6 @@ public class JavaCodeUtil {
 
 	}
 	finally {
-
 	    if(reader != null)
 	    {
 		try {
@@ -146,18 +95,6 @@ public class JavaCodeUtil {
 		    e.printStackTrace();
 		}
 	    }
-
-	    if(javaMainReader != null)
-	    {
-		try {
-		    javaMainReader.close();
-
-		} catch (IOException e) {
-
-		    e.printStackTrace();
-		}
-	    }
-
 	    writer.close();
 	}
     }
@@ -189,4 +126,87 @@ public class JavaCodeUtil {
 		}
 	    }}
     }
+
+    public  static void addMainMethod(ArrayList<String> javaCodeList, String className)
+    {
+	BufferedReader javaMainReader=null;
+	try {
+	    InputStream javaMainstream = JavaCodeUtil.class.getResourceAsStream("/templates/java_main.txt");
+
+	    javaMainReader = new BufferedReader(new InputStreamReader(javaMainstream));
+
+	    String line = javaMainReader.readLine();
+
+	    while (line != null) {
+
+		if(line.contains("<CLASS_NAME>"))
+		{
+		    line = line.replaceAll("<CLASS_NAME>", className) ;
+		}
+
+		javaCodeList.add(line);
+		line = javaMainReader.readLine();
+	    }
+	}catch(IOException e) {
+	    if(javaMainReader != null)
+	    {
+		try {
+		    javaMainReader.close();
+
+		} catch (IOException err) {
+
+		    err.printStackTrace();
+		}
+	    }
+
+	}
+    }
+    
+    public static String updateTestMethodContents(String line,CountHolder count )
+    {
+	 if(line.contains("driver.get(")) 
+	    {
+		line= line.replace("driver.get(", "driver.navigate().to(");
+	    }
+
+	    else if(line.contains(".sendKeys("))
+	    {
+		String  prefix = line.substring(0, line.lastIndexOf(".sendKeys(")+1);
+		String  suffix = line.substring(line.lastIndexOf(".sendKeys(")+1);
+		int quoteIndex = suffix.indexOf("\"");
+		if(quoteIndex!=-1)
+		{
+		    String ops = suffix.substring(0,suffix.indexOf("\""));
+		    ops=ops+"data.get("+count.value+"));";
+		    line = prefix+ops;
+		}
+		count.value++;
+	    }
+
+	    else if(line.contains("selectByVisibleText("))
+	    {
+		String  prefix = line.substring(0, line.lastIndexOf(".selectByVisibleText(")+1);
+		String  suffix = line.substring(line.lastIndexOf(".selectByVisibleText(")+1);
+		int quoteIndex = suffix.indexOf("\"");
+		if(quoteIndex!=-1)
+		{
+		    String ops = suffix.substring(0,suffix.indexOf("\""));
+		    ops=ops+"data.get("+count.value+"));";
+		    
+		    line = prefix+ops;
+		}
+		count.value++;
+	    }
+	 
+	 return line;
+    }
 }
+
+class CountHolder {
+    
+    public int value;
+    public CountHolder(int value)
+    {
+	this.value=value;
+    }
+} 

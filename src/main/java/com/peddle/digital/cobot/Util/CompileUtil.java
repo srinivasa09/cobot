@@ -23,7 +23,22 @@ public class CompileUtil {
 //    	    <CLASS_NAME> testObject= <CLASS_NAME()>;
 //    	    testObject.<METHOD_NAME>(data);
 //        }
-//        
+    
+    
+//     public void checkAndUpdateInputType(String elemeintID, java.util.List<String> data, Integer count)
+//     {
+//	 String type = driver.findElement(By.id(elemeintID)).getProperty("type");
+//	 if(type != null && type.equals("radio"))
+//         {
+//	     driver.findElement(By.xpath("//input[@value='"+ data.get(count) +"']")).click();
+//	     count++;
+//         }
+//	 else
+//	 {
+//	     driver.findElement(By.id(elemeintID)).click();
+//	 }
+//     }
+     
 //	public static void copyFromScriptRepoToRootDir(String scriptFile)
 //	{
 //		

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.peddle.digital.cobot.Util.ComplieScriptUtil;
+import com.peddle.digital.cobot.Util.ScriptUtil;
 import com.peddle.digital.cobot.constants.TargetSystems;
 import com.peddle.digital.cobot.model.Job;
 import com.peddle.digital.cobot.repository.JobRepository;
@@ -46,9 +46,10 @@ public class DispatcherService {
 	    WebDriverManager.firefoxdriver().setup();
 	    String scriptsDir = env.getProperty("scripts.dir");
 	    String scriptRootDir = env.getProperty("testcases.root");
-	    String scriptpackagedDir = env.getProperty("testcases.packagedir");
-	    String scriptpackage = env.getProperty("testcases.package");
-	    ComplieScriptUtil.compileScriptFile(job.getScriptFileName(), content,scriptsDir,scriptRootDir,scriptpackagedDir,scriptpackage);
+	    
+	    ScriptUtil.transformScriptFile(job.getScriptFileName(), scriptsDir, scriptRootDir);
+	    ScriptUtil.compileScriptFile(job.getScriptFileName(), scriptRootDir);
+	    ScriptUtil.runScriptFile(job.getScriptFileName(), content, scriptRootDir);
 	}
     }
 }
