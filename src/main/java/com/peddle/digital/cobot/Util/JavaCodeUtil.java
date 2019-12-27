@@ -197,7 +197,6 @@ public class JavaCodeUtil {
 		}
 		count.value++;
 	    }
-	 
 	 return line;
     }
 }
