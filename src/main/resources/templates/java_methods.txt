@@ -18,3 +18,18 @@
 	            e.printStackTrace();
 	        }
         }
+        
+        
+     public void checkByNameAndUpdateInputType(String elemeintID, java.util.List<String> data, CountHolder count)
+     {
+	    String type = driver.findElement(By.name(elemeintID)).getAttribute("type");
+	    if(type != null && type.equals("radio"))
+        {
+	       driver.findElement(By.xpath("//input[@value='"+ data.get(count.value) +"']")).click();
+	       count.value++;
+         }
+	     else
+	     {
+	       driver.findElement(By.name(elemeintID)).click();
+	     }
+     }        

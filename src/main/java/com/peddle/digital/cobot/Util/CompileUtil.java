@@ -27,7 +27,7 @@ public class CompileUtil {
     
 //     public void checkAndUpdateInputType(String elemeintID, java.util.List<String> data, Integer count)
 //     {
-//	 String type = driver.findElement(By.id(elemeintID)).getProperty("type");
+//	 String type = driver.findElement(By.id(elemeintID)).getAttribute("type");
 //	 if(type != null && type.equals("radio"))
 //         {
 //	     driver.findElement(By.xpath("//input[@value='"+ data.get(count) +"']")).click();

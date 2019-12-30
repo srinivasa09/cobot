@@ -30,15 +30,14 @@ public class JavaCodeUtil {
 	    String line = reader.readLine();
 	    boolean initconvert = false;
 	    boolean addedImports=false;
-	    CountHolder count=new CountHolder(0);
-
+	   
 	    ArrayList<String> javaCodeList = new ArrayList<String>();
 
 	    while (line != null) {
 
 		if(initconvert)
 		{		   
-		    line = updateTestMethodContents(line,count);
+		    line = updateTestMethodContents(line);
 		}
 
 		if( !addedImports && line.startsWith("import ")) {
@@ -50,7 +49,8 @@ public class JavaCodeUtil {
 		else if(line.contains("public void test"))
 		{
 		    initconvert=true;
-		    line =  "public void test(java.util.List<String> data) {";
+		    line =  "public void test(java.util.List<String> data) {\n\t CountHolder count=new CountHolder(0); \n";
+		    
 		}
 
 		else if(line.contains("public class"))
@@ -70,9 +70,11 @@ public class JavaCodeUtil {
 	    reader.close();
 	    javaCodeList.remove(javaCodeList.size() - 1);
 
-	    addMainMethod(javaCodeList,className);
+	    addMethods(javaCodeList,className);
 
 	    javaCodeList.add("}");
+	    
+	    addcounterClass(javaCodeList);
 
 	    for(String entry: javaCodeList)
 	    {
@@ -127,11 +129,11 @@ public class JavaCodeUtil {
 	    }}
     }
 
-    public  static void addMainMethod(ArrayList<String> javaCodeList, String className)
+    public  static void addMethods(ArrayList<String> javaCodeList, String className)
     {
 	BufferedReader javaMainReader=null;
 	try {
-	    InputStream javaMainstream = JavaCodeUtil.class.getResourceAsStream("/templates/java_main.txt");
+	    InputStream javaMainstream = JavaCodeUtil.class.getResourceAsStream("/templates/java_methods.txt");
 
 	    javaMainReader = new BufferedReader(new InputStreamReader(javaMainstream));
 
@@ -161,8 +163,35 @@ public class JavaCodeUtil {
 
 	}
     }
+
+    public  static void addcounterClass(ArrayList<String> javaCodeList)
+    {
+	BufferedReader counterReader=null;
+	try {
+	    InputStream javaMainstream = JavaCodeUtil.class.getResourceAsStream("/templates/counter.txt");
+
+	    counterReader = new BufferedReader(new InputStreamReader(javaMainstream));
+
+	    String line = counterReader.readLine();
+
+	    while (line != null) {
+		javaCodeList.add(line);
+		line = counterReader.readLine();
+	    }
+	}catch(IOException e) {
+	    if(counterReader != null)
+	    {
+		try {
+		    counterReader.close();
+		} catch (IOException err) {
+
+		    err.printStackTrace();
+		}
+	    }
+	}
+    }
     
-    public static String updateTestMethodContents(String line,CountHolder count )
+    public static String updateTestMethodContents(String line)
     {
 	 if(line.contains("driver.get(")) 
 	    {
@@ -177,10 +206,9 @@ public class JavaCodeUtil {
 		if(quoteIndex!=-1)
 		{
 		    String ops = suffix.substring(0,suffix.indexOf("\""));
-		    ops=ops+"data.get("+count.value+"));";
+		    ops=ops+"data.get(count.value++));";
 		    line = prefix+ops;
 		}
-		count.value++;
 	    }
 
 	    else if(line.contains("selectByVisibleText("))
@@ -191,21 +219,18 @@ public class JavaCodeUtil {
 		if(quoteIndex!=-1)
 		{
 		    String ops = suffix.substring(0,suffix.indexOf("\""));
-		    ops=ops+"data.get("+count.value+"));";
+		    ops=ops+"data.get(count.value++));";
 		    
 		    line = prefix+ops;
 		}
-		count.value++;
 	    }
+	 
+	    else if(line.trim().contains("driver.findElement(By.name(") && line.trim().endsWith(".click();"))
+	    {
+		String elemantName=line.trim().replace("driver.findElement(By.name(", "").replace(")).click();", "");
+		line="checkByNameAndUpdateInputType("+elemantName+",data,count);";
+	    }
+	 
 	 return line;
     }
 }
-
-class CountHolder {
-    
-    public int value;
-    public CountHolder(int value)
-    {
-	this.value=value;
-    }
-} 

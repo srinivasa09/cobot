@@ -1,0 +1,8 @@
+class CountHolder {
+    
+    public int value;
+    public CountHolder(int value)
+    {
+	this.value=value;
+    }
+}
