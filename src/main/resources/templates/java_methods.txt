@@ -20,13 +20,13 @@
         }
         
         
-     public void checkByNameAndUpdateInputType(String elemeintID, java.util.List<String> data, CountHolder count)
+     public void checkByNameAndUpdateInputType(String elemeintID, java.util.List<String> data, int[] count)
      {
 	    String type = driver.findElement(By.name(elemeintID)).getAttribute("type");
 	    if(type != null && type.equals("radio"))
         {
-	       driver.findElement(By.xpath("//input[@value='"+ data.get(count.value) +"']")).click();
-	       count.value++;
+	       driver.findElement(By.xpath("//input[@value='"+ data.get(count[0]++) +"']")).click();
+	       
          }
 	     else
 	     {

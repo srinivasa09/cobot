@@ -49,7 +49,7 @@ public class JavaCodeUtil {
 		else if(line.contains("public void test"))
 		{
 		    initconvert=true;
-		    line =  "public void test(java.util.List<String> data) {\n\t CountHolder count=new CountHolder(0); \n";
+		    line =  "public void test(java.util.List<String> data) {\n\t int[] count={0}; \n";
 		    
 		}
 
@@ -74,8 +74,7 @@ public class JavaCodeUtil {
 
 	    javaCodeList.add("}");
 	    
-	    addcounterClass(javaCodeList);
-
+	 
 	    for(String entry: javaCodeList)
 	    {
 		writer.println(entry);
@@ -164,32 +163,7 @@ public class JavaCodeUtil {
 	}
     }
 
-    public  static void addcounterClass(ArrayList<String> javaCodeList)
-    {
-	BufferedReader counterReader=null;
-	try {
-	    InputStream javaMainstream = JavaCodeUtil.class.getResourceAsStream("/templates/counter.txt");
-
-	    counterReader = new BufferedReader(new InputStreamReader(javaMainstream));
-
-	    String line = counterReader.readLine();
-
-	    while (line != null) {
-		javaCodeList.add(line);
-		line = counterReader.readLine();
-	    }
-	}catch(IOException e) {
-	    if(counterReader != null)
-	    {
-		try {
-		    counterReader.close();
-		} catch (IOException err) {
-
-		    err.printStackTrace();
-		}
-	    }
-	}
-    }
+    
     
     public static String updateTestMethodContents(String line)
     {
@@ -206,7 +180,7 @@ public class JavaCodeUtil {
 		if(quoteIndex!=-1)
 		{
 		    String ops = suffix.substring(0,suffix.indexOf("\""));
-		    ops=ops+"data.get(count.value++));";
+		    ops=ops+"data.get(count[0]++));";
 		    line = prefix+ops;
 		}
 	    }
@@ -219,7 +193,7 @@ public class JavaCodeUtil {
 		if(quoteIndex!=-1)
 		{
 		    String ops = suffix.substring(0,suffix.indexOf("\""));
-		    ops=ops+"data.get(count.value++));";
+		    ops=ops+"data.get(count[0]++));";
 		    
 		    line = prefix+ops;
 		}
