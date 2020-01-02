@@ -1,28 +1,36 @@
 package com.peddle.digital.cobot.Util;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.json.Json;
+import javax.json.JsonObject;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+
+
 
 public class CompileUtil {
     
-    
-//        public static void main(String[] args)
-//        {
-//            JSONObject obj = new JSONObject(args[0]);
-//    	    JSONArray jsonArray = obj.getJSONArray("data");
-//    	    List<Object> list = jsonArray.toList();
-//    	    List<String> data= new ArrayList<String> ();
-//
-//    	    for(Object a: list){
-//    	       data.add(String.valueOf(a));
-//    	    } 
-//    	    
-//    	    <CLASS_NAME> testObject= <CLASS_NAME()>;
-//    	    testObject.<METHOD_NAME>(data);
-//        }
+    public void test()
+    {
+	 //WebDriver  driver = new FirefoxDriver();
+	WebDriver driver = new ChromeDriver();
+	driver.manage().window().maximize();
+	
+	JsonObject dev = Json.createObjectBuilder().
+                add("developer", "duke").
+                build();
+	
+    }
+
+        public static void main(String[] args)
+        {
+           
+    	JsonObject dev = Json.createObjectBuilder().
+                add("developer", "duke").
+                build();
+    	System.out.println(dev.toString());
+        }
     
     
 //     public void checkAndUpdateInputType(String elemeintID, java.util.List<String> data, Integer count)

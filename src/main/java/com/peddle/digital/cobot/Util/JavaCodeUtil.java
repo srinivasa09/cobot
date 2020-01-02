@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 public class JavaCodeUtil {
 
@@ -28,16 +29,16 @@ public class JavaCodeUtil {
 	    String className = fileName.substring(fileName.lastIndexOf("\\")+1).replace(".java","");
 
 	    String line = reader.readLine();
-	    boolean initconvert = false;
+	    boolean initTestMetnodConvert = false;
 	    boolean addedImports=false;
 	   
 	    ArrayList<String> javaCodeList = new ArrayList<String>();
 
 	    while (line != null) {
 
-		if(initconvert)
+		if(initTestMetnodConvert)
 		{		   
-		    line = updateTestMethodContents(line);
+		    line = updateTestMethodContents(line,javaCodeList);
 		}
 
 		if( !addedImports && line.startsWith("import ")) {
@@ -48,7 +49,7 @@ public class JavaCodeUtil {
 		//rename test method
 		else if(line.contains("public void test"))
 		{
-		    initconvert=true;
+		    initTestMetnodConvert=true;
 		    line =  "public void test(java.util.List<String> data) {\n\t int[] count={0}; \n";
 		    
 		}
@@ -61,6 +62,10 @@ public class JavaCodeUtil {
 		else if(line.startsWith("package com.example.tests"))
 		{   
 		    line =  "";
+		}
+		else if(line.contains("driver = new FirefoxDriver();"))
+		{
+		    line ="\t driver = new ChromeDriver();";
 		}
 
 		javaCodeList.add(line);
@@ -164,12 +169,14 @@ public class JavaCodeUtil {
     }
 
     
-    
-    public static String updateTestMethodContents(String line)
+    public static String updateTestMethodContents(String line,ArrayList<String> javaCodeList)
     {
 	 if(line.contains("driver.get(")) 
 	    {
-		line= line.replace("driver.get(", "driver.navigate().to(");
+		line = line.replace("driver.get(", "driver.navigate().to(");
+		javaCodeList.add(line);
+		
+		line = "\t driver.manage().window().maximize();";
 	    }
 
 	    else if(line.contains(".sendKeys("))

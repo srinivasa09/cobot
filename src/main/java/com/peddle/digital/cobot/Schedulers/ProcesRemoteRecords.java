@@ -54,15 +54,6 @@ public class ProcesRemoteRecords {
 			
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			
-//			#RemoteAgent Script Upload URL
-//			agent.scriptUploadUrl=/agent/api/executescript
-//
-//			#RemoteAgent PORT
-//			agent.port=9090
-//
-//			#scripts Directory
-//			scripts.dir=C:/dump/scripts/uploads/
-			
 			String scriptsDir = env.getProperty("scripts.dir");
 			String agentPort = env.getProperty("agent.port");
 			String scriptUpload = env.getProperty("agent.scriptUploadUrl");

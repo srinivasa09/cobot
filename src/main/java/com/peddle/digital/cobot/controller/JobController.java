@@ -38,7 +38,6 @@ import com.peddle.digital.cobot.repository.JobRepository;
  *
  */
 
-
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api")
 public class JobController {
@@ -112,7 +111,7 @@ public class JobController {
     
     @PostMapping("/job/updatestatus")
     public ResponseEntity<?> updateJobStatus(@RequestBody Status jobStatus) {
-    	logger.info("Recieved Job Update Rquest for JOB"  + jobStatus.jobId );
+    	logger.info("Recieved Job Update Rquest for JOB "  + jobStatus.jobId );
     	Long jobDBId = JobUtil.getDBJobIDFromAppJobID(jobStatus.getJobId());
     	jobRepository.updateStatusAndReason(jobStatus.getStatus(),jobStatus.getReason(), jobDBId);
     	return ResponseEntity.ok().build();

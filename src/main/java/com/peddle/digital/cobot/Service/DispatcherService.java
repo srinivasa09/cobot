@@ -34,22 +34,25 @@ public class DispatcherService {
 	    targetSystem = obj.getString("TargetSystemURL");
 	}
 
+	String statusCallBackUrl = env.getProperty("cobot.status.callback.url");
 	if(targetSystem != null && targetSystem.contains(TargetSystems.JIRA))
 	{
-	    String statusCallBackUrl = env.getProperty("cobot.status.callback.url");
 	    com.cobot.testcases.JiraAddUserTest jira = new com.cobot.testcases.JiraAddUserTest();
 	    jira.test(content, appJobID, statusCallBackUrl);
 	}
 
 	if(job.getScriptFileName() != null)
 	{
-	    WebDriverManager.firefoxdriver().setup();
+	    //WebDriverManager.firefoxdriver().setup();
+	    WebDriverManager.chromedriver().setup();
+	   // System.setProperty("webdriver.chrome.driver",   WebDriverManager.chromedriver().getBinaryPath());
+	   
 	    String scriptsDir = env.getProperty("scripts.dir");
 	    String scriptRootDir = env.getProperty("testcases.root");
 	    
 	    ScriptUtil.transformScriptFile(job.getScriptFileName(), scriptsDir, scriptRootDir);
 	    ScriptUtil.compileScriptFile(job.getScriptFileName(), scriptRootDir);
-	    ScriptUtil.runScriptFile(job.getScriptFileName(), content, scriptRootDir);
+	    ScriptUtil.runScriptFile(job.getScriptFileName(), content, scriptRootDir,statusCallBackUrl,appJobID);
 	}
     }
 }

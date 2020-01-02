@@ -1,3 +1,7 @@
+ 
+        String callbackUrl;
+        String jobid;
+        
         public static void main(String[] args)
         {
             JSONObject obj = new JSONObject(args[0]);
@@ -9,13 +13,33 @@
     	       data.add(String.valueOf(a));
     	    } 
     	    
+    	    System.setProperty("webdriver.chrome.driver", args[1]);
+    	    
     	    <CLASS_NAME> testObject= new <CLASS_NAME>();
+    	    testObject.callbackUrl = args[2];
+    	    testObject.jobid = args[3];
     	    try {  
     	    	testObject.setUp();
     	        testObject.test(data);
     	        testObject.tearDown();
+    	        
+    	        JsonObject response = Json.createObjectBuilder().
+                   add("jobId", testObject.jobid).add("status","Success").add("reason", "").
+                   build();
+                   
+                sendExecutionStatus(testObject.callbackUrl,response.toString());
+    	        
     	    } catch(Exception e) {
 	            e.printStackTrace();
+	            
+	            JsonObject response = Json.createObjectBuilder().
+                   add("jobId", testObject.jobid).add("status","Failed").add("reason", e.getMessage()).
+                   build();
+                try {
+                sendExecutionStatus(testObject.callbackUrl,response.toString());
+                } catch(Exception ex) {
+                  ex.printStackTrace();
+                }
 	        }
         }
         
@@ -32,4 +56,41 @@
 	     {
 	       driver.findElement(By.name(elemeintID)).click();
 	     }
-     }        
+     }
+     
+    public static void sendExecutionStatus(String postUrl, String inputJson) throws Exception {
+
+		URL url = new URL (postUrl);
+
+		System.out.println(inputJson);
+
+		HttpURLConnection con = (HttpURLConnection)url.openConnection();
+		con.setRequestMethod("POST");
+
+		con.setRequestProperty("Content-Type", "application/json; utf-8");
+		con.setRequestProperty("Accept", "application/json");
+
+		con.setDoOutput(true);
+
+		try(OutputStream os = con.getOutputStream()){
+	    	byte[] input = inputJson.getBytes("utf-8");
+	    	os.write(input, 0, input.length);			
+		}
+
+		int code = con.getResponseCode();
+		System.out.println(code);
+
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))){
+	    	StringBuilder response = new StringBuilder();
+	    	String responseLine = null;
+	    	while ((responseLine = br.readLine()) != null) {
+				response.append(responseLine.trim());
+	    	}
+	    	System.out.println(response.toString());
+		}
+		catch(Exception e)
+		{
+	    	e.printStackTrace();
+		}
+    }
+           
