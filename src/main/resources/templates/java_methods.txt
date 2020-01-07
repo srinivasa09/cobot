@@ -44,19 +44,48 @@
         }
         
         
-     public void checkByNameAndUpdateInputType(String elemeintID, java.util.List<String> data, int[] count)
+     public void click(String locatorName, String elementId, java.util.List<String> data, int[] count)
      {
-	    String type = driver.findElement(By.name(elemeintID)).getAttribute("type");
-	    if(type != null && type.equals("radio"))
-        {
-	       driver.findElement(By.xpath("//input[@value='"+ data.get(count[0]++) +"']")).click();
-	       
-         }
-	     else
-	     {
-	       driver.findElement(By.name(elemeintID)).click();
-	     }
-     }
+	    String type = getElementType(locatorName, elementId).getAttribute("type");
+	    if (type != null && type.equals("radio")) {
+			if (driver.findElements(By.xpath("//label[contains(.,'" + data.get(count[0]) + "')]/input[@type='radio'][@"
+					+ locatorName + "='" + elementId + "']")).size() != 0) {
+				driver.findElements(By.xpath("//label[contains(.,'" + data.get(count[0]++)
+						+ "')]/input[@type='radio'][@" + locatorName + "='" + elementId + "']")).get(0).click();
+			} else if (driver.findElements(By.xpath("//input[contains(.,'" + data.get(count[0]) + "')][@type='radio'][@"
+					+ locatorName + "='" + elementId + "']")).size() != 0) {
+				driver.findElements(By.xpath("//input[contains(.,'" + data.get(count[0]++) + "')][@type='radio'][@"
+						+ locatorName + "='" + elementId + "']")).get(0).click();
+			}
+		} else if(type != null && type.equals("checkbox")) {
+			if(driver.findElements(By.xpath("//label[contains(.,'" + data.get(count[0]) + "')]")).size() != 0) {
+				driver.findElement(By.xpath("//label[contains(.,'" + data.get(count[0]++) + "')]")).click();
+			} else if(driver.findElements(By.xpath("//input[contains(.,'" + data.get(count[0]) + "')]")).size() != 0) {
+				driver.findElement(By.xpath("//input[contains(.,'" + data.get(count[0]++) + "')]")).click();
+			}
+	    } else {
+			getElementType(locatorName, elementId).click();
+		}
+	}
+
+	public WebElement getElementType(String locatorName, String elemeintID) {
+		if (StringUtils.equals(locatorName, "name")) {
+			return driver.findElement(By.name(elemeintID));
+		} else if (StringUtils.equals(locatorName, "xpath")) {
+			return driver.findElement(By.xpath(elemeintID));
+		} else if (StringUtils.equals(locatorName, "cssSelector")) {
+			return driver.findElement(By.cssSelector(elemeintID));
+		} else if (StringUtils.equals(locatorName, "linkText")) {
+			return driver.findElement(By.linkText(elemeintID));
+		} else if (StringUtils.equals(locatorName, "partialLinkText")) {
+			return driver.findElement(By.partialLinkText(elemeintID));
+		} else if (StringUtils.equals(locatorName, "id")) {
+			return driver.findElement(By.id(elemeintID));
+		} else if (StringUtils.equals(locatorName, "class")) {
+			return driver.findElement(By.className(elemeintID));
+		}
+		return null;
+	}
      
     public static void sendExecutionStatus(String postUrl, String inputJson) throws Exception {
 

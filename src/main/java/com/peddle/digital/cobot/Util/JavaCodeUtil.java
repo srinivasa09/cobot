@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.chrome.ChromeDriver;
 
@@ -206,10 +207,11 @@ public class JavaCodeUtil {
 		}
 	    }
 	 
-	    else if(line.trim().contains("driver.findElement(By.name(") && line.trim().endsWith(".click();"))
+	    else if(line.trim().endsWith(".click();"))
 	    {
-		String elemantName=line.trim().replace("driver.findElement(By.name(", "").replace(")).click();", "");
-		line="checkByNameAndUpdateInputType("+elemantName+",data,count);";
+	    	String locatorName= StringUtils.substringsBetween(line.trim(), "driver.findElement(By.", "(")[0];
+	    	String elemantName=line.trim().replace("driver.findElement(By."+ locatorName +"(", "").replace(")).click();", "");
+	    	line="click("+ "\"" +locatorName+"\"" + ","+elemantName+",data,count);";
 	    }
 	 
 	 return line;
