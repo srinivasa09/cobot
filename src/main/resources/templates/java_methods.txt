@@ -4,6 +4,7 @@
         
         public static void main(String[] args)
         {
+        
             JSONObject obj = new JSONObject(args[0]);
     	    JSONArray jsonArray = obj.getJSONArray("data");
     	    List<Object> list = jsonArray.toList();

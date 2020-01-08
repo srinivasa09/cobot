@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.chrome.ChromeDriver;
 
@@ -28,6 +29,8 @@ public class JavaCodeUtil {
 	    writer = new PrintWriter(dest);
 
 	    String className = fileName.substring(fileName.lastIndexOf("\\")+1).replace(".java","");
+	    String testMethod = StringUtils.removeEndIgnoreCase(StringUtils.uncapitalize(className),"test");
+	    
 
 	    String line = reader.readLine();
 	    boolean initTestMetnodConvert = false;
@@ -48,13 +51,13 @@ public class JavaCodeUtil {
 		}
 
 		//rename test method
-		else if(line.contains("public void test"))
+		else if(line.contains("public void "+testMethod))
 		{
 		    initTestMetnodConvert=true;
 		    line =  "public void test(java.util.List<String> data) {\n\t int[] count={0}; \n";
 		    
 		}
-
+		
 		else if(line.contains("public class"))
 		{   
 		    line =  "public class "+className +"{";
